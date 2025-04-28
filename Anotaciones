@@ -1,0 +1,75 @@
+CUDA paso a paso
+
+
+MODULO 1
+++++++++
+
+
+host=cpu
+device=gpu
+
+CUDA (Compute Unified Device Architecture) 
+
+__global__   es una funcion que se ejecutara en la GPU
+Ejemplo: __global__ void suma_vectores(...) { ... }
+
+mi_kernel<<<bloques, hilos>>>(args);   para ejecutar los kernels
+
+Los kernels son buenos para ejecutar SIMD - Single Instruction Multiple Data. Piensa en la CPU como un chef gourmet y la GPU como una cadena de montaje con muchos operarios haciendo lo mismo muy rápido.
+
+Un ejemplo mas claro de kernel seria
+
+__global__ void mi_kernel(int *a) {
+    int idx = threadIdx.x;  // Cada hilo tiene un índice único
+    a[idx] = idx * 2;
+}
+
+mientras que este es llamado en el main() como
+
+mi_kernel<<<1, 10>>>(dev_a);  // Lanzas 10 hilos que ejecutan la función en paralelo
+
+
+Entre otros comandos esta el:
+
+1)Guardar espacio en la memoria del gpu con: cudaMalloc(void** ptr, size_t size);
+
+ptr: Es la dirección de un puntero que recibirá la memoria de la GPU.
+size: Número de bytes a reservar.
+
+2)Guardar los datos en la memoria del dispositivo con: cudaMemcpy(void *dst, const void *src, size_t size, cudaMemcpyKind kind);
+
+dst: destino de los datos.
+src: origen de los datos.
+size: tamaño en bytes.
+kind: dirección del copiado. Puede ser: cudaMemcpyHostToDevice, cudaMemcpyDeviceToHost, cudaMemcpyDeviceToDevice, cudaMemcpyHostToHost
+
+3)Liberar la memoria usada con: cudaFree(void *ptr);
+
+ptr: Es la dirección de un puntero que se liberara
+
+Los hilos son organizados en bloques en el GPU de la siguiente forma:
+[ Grilla ]
+ └── Bloques (gridDim.x)
+     └── Hilos por bloque (blockDim.x)
+
+analogia
+
+[ Ciudad (Grilla) ]
+ └── [ Cancha (Bloque) ]
+       └── [ Jugadores (Hilos) ]
+             └── [ Equipos de 32 jugadores (Warps) ]
+                  └── [ Supervisados por un Árbitro (SM) ]
+                  
+                  
+CUDA esta compuesta de 3 capas: Runtime API (comandos pre-hechos), Driver API (mas bajo nivel donde por ejemplo hay que hacer manualmente los kernels), PTX (Parallel Thread Execution) y el ensamblador SASS (Shader Assembly).
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+MODULO 2
+++++++++
+
+
